@@ -105,6 +105,8 @@ def generate(word_list, words=5, specials=0):
 
     return words, with_specials
 
+def select_word(placeholder):
+    return generate(open('uwords.' + placeholder, 'r').readlines(), words=1, specials=0)[0][0][:-1]
 
 def read_word_list(fobj):
     # Read the word list skipping lines which do not start with 5 digits
@@ -202,6 +204,9 @@ def main():
     parser.add_option("-n", "--words", dest="words", type="int", metavar="N",
                       help="generate N words (default: %default)",
                       default=config.getint("defaults", "words"))
+    # todo: blend this template option with regular style here
+    parser.add_option("-t", "--template", dest="template",
+                      default=["adj", "noun", "adv", "verb", "noun", "adv", "verb"])
     parser.add_option("-s", "--special", dest="special", type="int", metavar="M",
                       help="insert M special characters (default: %default)",
                       default=config.getint("defaults", "special"))
@@ -217,12 +222,22 @@ def main():
                       help="use the word list for LANG (" + ", ".join(linguas) +
                       ") (default: %default)", default=config.get("defaults", "lang"))
 
+
     options, args = parser.parse_args()
     if args or options.words < 1 or options.special < 0:
         parser.print_help()
         sys.exit(0)
 
     parser.destroy()
+
+    # todo change this hack
+    if options.template:
+        print options.template
+        words = []
+        for placeholder in options.template:
+            words.append(select_word(placeholder))
+        print ' '.join(words)
+        sys.exit(0)
 
     # --file has higher precedence than --lang
     if options.file:
